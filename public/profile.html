@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Profile & Settings — MedShield Health Portal</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <span class="logo-badge">M+</span>
+                <span>MedShield Health</span>
+            </a>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Overview & Search</a></li>
+                    <li><a href="login.html">Login (Easy SQLi)</a></li>
+                    <li><a href="records.html">Records (Advanced SQLi)</a></li>
+                    <li><a href="reviews.html">Reviews (Stored XSS)</a></li>
+                    <li><a href="department.html">Departments (DOM XSS)</a></li>
+                    <li><a href="profile.html" class="active">Profile (CSRF)</a></li>
+                </ul>
+            </nav>
+            <div class="mode-toggle-box">
+                <span id="nav-mode-badge" class="mode-badge vulnerable">🔴 VULNERABLE MODE</span>
+                <button id="toggle-mode-btn" class="btn-toggle">Switch Mode</button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="card" style="max-width: 650px; margin: 2rem auto;">
+            <h1 class="card-title">👤 Patient Profile & Security Settings (CSRF Target)</h1>
+            <p class="lead">
+                Demonstrates a critical state-changing operation (updating primary contact email). In Vulnerable Mode, this endpoint lacks Anti-CSRF token verification, allowing external sites to forge requests on your behalf.
+            </p>
+
+            <div id="profile-alert"></div>
+
+            <!-- Profile Info Card -->
+            <div style="background: rgba(15, 23, 42, 0.8); border: 1px solid #334155; border-radius: 8px; padding: 1.25rem; margin-bottom: 1.5rem;">
+                <div style="margin-bottom: 0.5rem;"><strong>Active Patient:</strong> <span id="disp-username">Loading...</span></div>
+                <div style="margin-bottom: 0.5rem;"><strong>Registered Email:</strong> <span id="disp-email" style="color: #38bdf8; font-weight: bold;">Loading...</span></div>
+                <div style="margin-bottom: 0.5rem;"><strong>Clinical Role:</strong> <span id="disp-role">Loading...</span></div>
+                <div><strong>Anti-CSRF Security Token:</strong> <code id="disp-csrf" style="color: #6ee7b7; font-family: monospace;">Loading...</code></div>
+            </div>
+
+            <!-- Change Email Form -->
+            <form id="email-form" onsubmit="updateEmail(event)">
+                <div class="form-group">
+                    <label for="new-email">Update Primary Email Address:</label>
+                    <input type="email" id="new-email" placeholder="patient.newemail@hospital.org" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Save Email Preference</button>
+            </form>
+
+            <!-- External Malicious PoC Exploit Link -->
+            <div class="payload-helper" style="margin-top: 2rem; border-color: rgba(239, 68, 68, 0.4);">
+                <h4 style="color: #f87171;">⚠️ Cross-Site Request Forgery (CSRF) Exploit Simulation:</h4>
+                <p style="font-size: 0.85rem; color: #cbd5e1; margin-bottom: 0.75rem;">
+                    An attacker creates a separate website hosting an auto-submitting form. Click the button below to launch the attacker's standalone exploit page:
+                </p>
+                <a href="attacker_csrf_exploit.html" target="_blank" class="btn" style="background: #dc2626; color: white;">
+                    🚨 Open Attacker's Malicious Exploit Page (New Tab)
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>MedShield Health Portal — Information Security Practical Assignment 2</p>
+    </footer>
+
+    <script src="app.js"></script>
+    <script>
+        let currentCsrfToken = '';
+
+        async function loadProfile() {
+            try {
+                const res = await fetch('/api/profile');
+                const data = await res.json();
+                if (data.user) {
+                    document.getElementById('disp-username').textContent = data.user.username;
+                    document.getElementById('disp-email').textContent = data.user.email;
+                    document.getElementById('disp-role').textContent = data.user.role;
+                    document.getElementById('disp-csrf').textContent = data.user.csrf_token;
+                    currentCsrfToken = data.user.csrf_token;
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function updateEmail(e) {
+            e.preventDefault();
+            const email = document.getElementById('new-email').value;
+            const alertBox = document.getElementById('profile-alert');
+
+            // Check mode
+            const modeRes = await fetch('/api/mode');
+            const modeData = await modeRes.json();
+
+            const headers = { 'Content-Type': 'application/json' };
+            if (modeData.isSafeMode) {
+                headers['X-CSRF-Token'] = currentCsrfToken;
+            }
+
+            try {
+                const res = await fetch('/api/profile/email', {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify({ email: email })
+                });
+
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    alertBox.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
+                } else {
+                    alertBox.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+                }
+                await loadProfile();
+            } catch (err) {
+                alertBox.innerHTML = `<div class="alert alert-danger">Network Error: ${err.message}</div>`;
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', loadProfile);
+    </script>
+</body>
+</html>
