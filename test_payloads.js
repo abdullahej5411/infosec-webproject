@@ -42,7 +42,7 @@ function makeRequest(method, urlPath, body = null, headers = {}) {
 
 async function runTestSuite() {
     console.log('================================================================');
-    console.log('   MEDSHIELD HEALTH PORTAL — AUTOMATED PAYLOAD TEST SUITE      ');
+    console.log('   MEDSHIELD HEALTH PORTAL - AUTOMATED PAYLOAD TEST SUITE      ');
     console.log(`   Execution Time: ${new Date().toISOString()}                  `);
     console.log('================================================================\n');
 
@@ -50,7 +50,7 @@ async function runTestSuite() {
     // TEST 1: REFLECTED XSS
     // -------------------------------------------------------------
     console.log('----------------------------------------------------------------');
-    console.log('1. CROSS-SITE SCRIPTING (XSS) — REFLECTED');
+    console.log('1. CROSS-SITE SCRIPTING (XSS) - REFLECTED');
     console.log('----------------------------------------------------------------');
     const xssPayload = "<script>alert('Reflected XSS')</script>";
 
@@ -74,7 +74,7 @@ async function runTestSuite() {
     // TEST 2: STORED XSS
     // -------------------------------------------------------------
     console.log('----------------------------------------------------------------');
-    console.log('2. CROSS-SITE SCRIPTING (XSS) — STORED');
+    console.log('2. CROSS-SITE SCRIPTING (XSS) - STORED');
     console.log('----------------------------------------------------------------');
     const storedPayload = "<img src=x onerror=\"alert('Stored XSS')\">";
 
@@ -133,10 +133,10 @@ async function runTestSuite() {
     console.log(`    Result:   DEFENSE PASSED (HTTP 403 Forbidden: Missing CSRF token!)\n`);
 
     // -------------------------------------------------------------
-    // TEST 4: SQL INJECTION — LEVEL 1 (EASY LOGIN BYPASS)
+    // TEST 4: SQL INJECTION - LEVEL 1 (EASY LOGIN BYPASS)
     // -------------------------------------------------------------
     console.log('----------------------------------------------------------------');
-    console.log('4. SQL INJECTION — LEVEL 1: EASY (AUTH BYPASS)');
+    console.log('4. SQL INJECTION - LEVEL 1: EASY (AUTH BYPASS)');
     console.log('----------------------------------------------------------------');
     const sqliEasyPayload = "' OR '1'='1' --";
 
@@ -159,10 +159,10 @@ async function runTestSuite() {
     console.log(`    Result:   DEFENSE PASSED (Parameterized query blocked injection)\n`);
 
     // -------------------------------------------------------------
-    // TEST 5: SQL INJECTION — LEVEL 2 (INTERMEDIATE BLIND)
+    // TEST 5: SQL INJECTION - LEVEL 2 (INTERMEDIATE BLIND)
     // -------------------------------------------------------------
     console.log('----------------------------------------------------------------');
-    console.log('5. SQL INJECTION — LEVEL 2: INTERMEDIATE (BLIND BOOLEAN)');
+    console.log('5. SQL INJECTION - LEVEL 2: INTERMEDIATE (BLIND BOOLEAN)');
     console.log('----------------------------------------------------------------');
     const blindTrue = "Cardiology' AND (SELECT SUBSTR(password,1,1) FROM users WHERE username='admin')='A' --";
     const blindFalse = "Cardiology' AND (SELECT SUBSTR(password,1,1) FROM users WHERE username='admin')='Z' --";
@@ -176,10 +176,10 @@ async function runTestSuite() {
     console.log(`    Result:   EXPLOIT SUCCEEDED (Boolean differential allows blind password exfiltration!)\n`);
 
     // -------------------------------------------------------------
-    // TEST 6: SQL INJECTION — LEVEL 3 (ADVANCED 4-STAGE DATA DUMP)
+    // TEST 6: SQL INJECTION - LEVEL 3 (ADVANCED 4-STAGE DATA DUMP)
     // -------------------------------------------------------------
     console.log('----------------------------------------------------------------');
-    console.log('6. SQL INJECTION — LEVEL 3: ADVANCED (4-STAGE UNION ATTACK)');
+    console.log('6. SQL INJECTION - LEVEL 3: ADVANCED (4-STAGE UNION ATTACK)');
     console.log('----------------------------------------------------------------');
     const stage4Payload = "%' UNION SELECT id, username, password, email, role, ssn FROM users --";
 
