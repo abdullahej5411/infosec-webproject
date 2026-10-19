@@ -1,0 +1,26 @@
+{
+  "name": "medshield-health-portal",
+  "version": "1.0.0",
+  "description": "Information Security Practical Assignment 2 - Full Stack Web Security Project (Vulnerable vs Safe)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "seed": "node seed.js",
+    "test-payloads": "node test_payloads.js"
+  },
+  "keywords": [
+    "infosec",
+    "xss",
+    "csrf",
+    "sqli",
+    "blue-team",
+    "security"
+  ],
+  "author": "Elliot Alderson & Group",
+  "license": "ISC",
+  "dependencies": {
+    "cookie-parser": "^1.4.7",
+    "express": "^4.21.2",
+    "sqlite3": "^6.0.1"
+  }
+}
