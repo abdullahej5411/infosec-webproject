@@ -1,8 +1,8 @@
 /**
- * app.js - Shared Client-Side Logic for MedShield
+ * app.js - MedShield Client-Side Controller
+ * Handles global security mode state, toggle interactions, and payload autofill.
  */
 
-// Initialize UI on page load
 document.addEventListener('DOMContentLoaded', async () => {
     await updateModeBadge();
 
@@ -10,8 +10,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (toggleBtn) {
         toggleBtn.addEventListener('click', async () => {
             try {
-                const res = await fetch('/api/mode/toggle', { method: 'POST' });
-                const data = await res.json();
+                await fetch('/api/mode/toggle', { method: 'POST' });
                 window.location.reload();
             } catch (err) {
                 console.error('Failed to toggle mode:', err);
@@ -19,7 +18,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Setup chip click-to-fill helpers
+    // Attach click-to-autofill listeners for chips
     document.querySelectorAll('.chip').forEach(chip => {
         chip.addEventListener('click', () => {
             const targetInputId = chip.getAttribute('data-target');
@@ -42,12 +41,12 @@ async function updateModeBadge() {
 
         if (badge) {
             if (data.isSafeMode) {
-                badge.className = 'mode-badge safe';
-                badge.innerHTML = '🟢 SAFE (HARDENED) MODE';
+                badge.className = 'mode-indicator safe';
+                badge.innerHTML = '<span class="status-dot"></span> SAFE (HARDENED) MODE';
                 if (toggleBtn) toggleBtn.textContent = 'Switch to Vulnerable';
             } else {
-                badge.className = 'mode-badge vulnerable';
-                badge.innerHTML = '🔴 VULNERABLE MODE';
+                badge.className = 'mode-indicator vulnerable';
+                badge.innerHTML = '<span class="status-dot"></span> VULNERABLE MODE';
                 if (toggleBtn) toggleBtn.textContent = 'Switch to Safe Mode';
             }
         }
