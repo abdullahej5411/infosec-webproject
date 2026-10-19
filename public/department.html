@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Departments Directory — MedShield Health Portal</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <span class="logo-badge">M+</span>
+                <span>MedShield Health</span>
+            </a>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Overview & Search</a></li>
+                    <li><a href="login.html">Login (Easy SQLi)</a></li>
+                    <li><a href="records.html">Records (Advanced SQLi)</a></li>
+                    <li><a href="reviews.html">Reviews (Stored XSS)</a></li>
+                    <li><a href="department.html" class="active">Departments (DOM XSS)</a></li>
+                    <li><a href="profile.html">Profile (CSRF)</a></li>
+                </ul>
+            </nav>
+            <div class="mode-toggle-box">
+                <span id="nav-mode-badge" class="mode-badge vulnerable">🔴 VULNERABLE MODE</span>
+                <button id="toggle-mode-btn" class="btn-toggle">Switch Mode</button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="card">
+            <h1 class="card-title">🏢 Clinical Departments Directory (DOM-based XSS)</h1>
+            <p class="lead">
+                Demonstrates <strong>DOM-based Cross-Site Scripting</strong>. The vulnerability exists purely within client-side JavaScript execution: untrusted input from the URL fragment (<code>location.hash</code>) is written into the document using <code>innerHTML</code> without ever touching the web server.
+            </p>
+
+            <div class="alert alert-info">
+                <strong>Mechanism:</strong> When you select a department or visit a URL containing a hash like <code>#dept=...</code>, the client script parses the hash. In <strong>Vulnerable Mode</strong>, it assigns the hash value directly to <code>innerHTML</code>. In <strong>Safe Mode</strong>, it assigns to <code>textContent</code>.
+            </div>
+
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+                <button class="btn btn-secondary" onclick="setDepartmentHash('Cardiovascular Care')">Cardiology</button>
+                <button class="btn btn-secondary" onclick="setDepartmentHash('Brain & Spine Institute')">Neurology</button>
+                <button class="btn btn-secondary" onclick="setDepartmentHash('Cancer Care Center')">Oncology</button>
+            </div>
+
+            <!-- DOM Quick Chips -->
+            <div class="payload-helper">
+                <h4>🎯 Quick-Test DOM XSS Payloads:</h4>
+                <div class="payload-chips">
+                    <span class="chip" onclick="setDepartmentHash('<img src=x onerror=&quot;alert(\'DOM XSS via location.hash!\')&quot;>')">
+                        Trigger DOM Payload 1: &lt;img src=x onerror=alert(...)&gt;
+                    </span>
+                    <span class="chip" onclick="setDepartmentHash('<svg onload=&quot;alert(\'SVG DOM XSS Triggered\')&quot;>')">
+                        Trigger DOM Payload 2: &lt;svg onload=alert(...)&gt;
+                    </span>
+                    <span class="chip" onclick="setDepartmentHash('Diagnostic Imaging')">
+                        Clean Department: Diagnostic Imaging
+                    </span>
+                </div>
+            </div>
+
+            <!-- Dynamic DOM Injection Target -->
+            <div style="margin-top: 2rem; background: rgba(15, 23, 42, 0.7); border: 1px solid #334155; border-radius: 8px; padding: 1.5rem;">
+                <h3 style="color: var(--accent); margin-bottom: 0.5rem;">Active Department Selection:</h3>
+                <div id="dept-preview" style="font-size: 1.1rem; color: #f8fafc; min-height: 40px; padding: 0.5rem; background: rgba(0,0,0,0.2); border-radius: 4px;">
+                    (No department selected yet. Click a button or chip above.)
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>MedShield Health Portal — Information Security Practical Assignment 2</p>
+    </footer>
+
+    <script src="app.js"></script>
+    <script>
+        function setDepartmentHash(deptName) {
+            window.location.hash = 'dept=' + encodeURIComponent(deptName);
+            handleHashChange();
+        }
+
+        async function handleHashChange() {
+            const hash = window.location.hash;
+            if (!hash || !hash.includes('=')) return;
+
+            const rawVal = decodeURIComponent(hash.split('=')[1] || '');
+            const previewEl = document.getElementById('dept-preview');
+
+            // Check current server mode
+            const res = await fetch('/api/mode');
+            const data = await res.json();
+
+            if (data.isSafeMode) {
+                // --- SAFE DEFENSE: textContent prevents HTML/script execution ---
+                previewEl.textContent = `Department: ${rawVal} (Rendered safely via textContent)`;
+            } else {
+                // --- VULNERABLE: Direct assignment to innerHTML execution sink ---
+                previewEl.innerHTML = `Department: ${rawVal} <span style="color:#f87171;">(Rendered via innerHTML sink)</span>`;
+            }
+        }
+
+        window.addEventListener('hashchange', handleHashChange);
+        window.addEventListener('DOMContentLoaded', handleHashChange);
+    </script>
+</body>
+</html>

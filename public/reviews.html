@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Feedback & Reviews — MedShield Health Portal</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <span class="logo-badge">M+</span>
+                <span>MedShield Health</span>
+            </a>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Overview & Search</a></li>
+                    <li><a href="login.html">Login (Easy SQLi)</a></li>
+                    <li><a href="records.html">Records (Advanced SQLi)</a></li>
+                    <li><a href="reviews.html" class="active">Reviews (Stored XSS)</a></li>
+                    <li><a href="department.html">Departments (DOM XSS)</a></li>
+                    <li><a href="profile.html">Profile (CSRF)</a></li>
+                </ul>
+            </nav>
+            <div class="mode-toggle-box">
+                <span id="nav-mode-badge" class="mode-badge vulnerable">🔴 VULNERABLE MODE</span>
+                <button id="toggle-mode-btn" class="btn-toggle">Switch Mode</button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="card">
+            <h1 class="card-title">💬 Patient Testimonials & Reviews (Stored XSS)</h1>
+            <p class="lead">
+                Demonstrates <strong>Stored (Persistent) Cross-Site Scripting</strong>. In Vulnerable Mode, comments containing JavaScript or HTML tags are permanently written into the database and triggered every time any user loads this page.
+            </p>
+
+            <form id="review-form" onsubmit="submitReview(event)">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label for="patient_name">Your Name:</label>
+                        <input type="text" id="patient_name" value="Patient Alex" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="doctor_name">Attending Physician:</label>
+                        <select id="doctor_name">
+                            <option value="Dr. Sarah Jenkins">Dr. Sarah Jenkins (Cardiology)</option>
+                            <option value="Dr. Robert Stone">Dr. Robert Stone (Neurology)</option>
+                            <option value="Dr. Emily Vance">Dr. Emily Vance (Oncology)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="comment">Feedback / Experience Description:</label>
+                    <textarea id="comment" rows="3" placeholder="Enter patient experience or Stored XSS payload..." required></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Submit Patient Review</button>
+            </form>
+
+            <!-- Quick Stored XSS Chips -->
+            <div class="payload-helper">
+                <h4>🎯 Quick-Test Stored XSS Payloads:</h4>
+                <div class="payload-chips">
+                    <span class="chip" data-target="comment" data-payload="<img src=x onerror=&quot;alert('Stored XSS Executed from MedShield DB!')&quot;>">
+                        Payload 1: &lt;img src=x onerror=alert(...)&gt;
+                    </span>
+                    <span class="chip" data-target="comment" data-payload="<b onmouseover=&quot;alert('Hover XSS!')&quot; style=&quot;color:red;cursor:pointer;&quot;>Hover over this compromised comment!</b>">
+                        Payload 2: Mouseover Trigger Event
+                    </span>
+                    <span class="chip" data-target="comment" data-payload="The treatment in cardiovascular wing was prompt and very professional.">
+                        Normal Review
+                    </span>
+                </div>
+            </div>
+
+            <!-- Existing Reviews List -->
+            <h3 style="margin-top: 2rem; margin-bottom: 1rem;">Recent Patient Testimonials:</h3>
+            <div id="reviews-container"></div>
+        </div>
+    </main>
+
+    <footer>
+        <p>MedShield Health Portal — Information Security Practical Assignment 2</p>
+    </footer>
+
+    <script src="app.js"></script>
+    <script>
+        async function loadReviews() {
+            const container = document.getElementById('reviews-container');
+            const res = await fetch('/api/reviews');
+            const data = await res.json();
+
+            container.innerHTML = '';
+            if (data.reviews && data.reviews.length > 0) {
+                data.reviews.forEach(r => {
+                    const card = document.createElement('div');
+                    card.style.background = 'rgba(15, 23, 42, 0.6)';
+                    card.style.border = '1px solid rgba(255, 255, 255, 0.08)';
+                    card.style.borderRadius = '8px';
+                    card.style.padding = '1rem';
+                    card.style.marginBottom = '1rem';
+
+                    // In Vulnerable Mode, unescaped raw comment triggers XSS
+                    card.innerHTML = `
+                        <div style="display:flex; justify-content:space-between; margin-bottom:0.4rem;">
+                            <strong>${r.patient_name}</strong>
+                            <span style="color:var(--text-muted); font-size:0.85rem;">Dr: ${r.doctor_name} | ⭐ ${r.rating}/5</span>
+                        </div>
+                        <div class="review-body" style="color:#e2e8f0; font-size:0.95rem;">
+                            ${r.comment}
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            } else {
+                container.innerHTML = `<p style="color:var(--text-muted);">No reviews posted yet.</p>`;
+            }
+        }
+
+        async function submitReview(e) {
+            e.preventDefault();
+            const patient_name = document.getElementById('patient_name').value;
+            const doctor_name = document.getElementById('doctor_name').value;
+            const comment = document.getElementById('comment').value;
+
+            await fetch('/api/reviews', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ patient_name, doctor_name, rating: 5, comment })
+            });
+
+            document.getElementById('comment').value = '';
+            await loadReviews();
+        }
+
+        window.addEventListener('DOMContentLoaded', loadReviews);
+    </script>
+</body>
+</html>
