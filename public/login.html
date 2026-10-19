@@ -10,95 +10,80 @@
     <header>
         <div class="nav-container">
             <a href="index.html" class="brand">
-                <div class="brand-icon">
-                    <svg class="icon-svg" viewBox="0 0 24 24" style="stroke: #ffffff;">
-                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                    </svg>
-                </div>
-                <span>MedShield Clinical Portal</span>
+                <span class="brand-dot"></span>
+                <span>MedShield</span>
+                <span class="brand-badge">SecLab</span>
             </a>
             <nav>
                 <ul>
-                    <li><a href="index.html">Search (Reflected XSS)</a></li>
-                    <li><a href="login.html" class="active">Login (Easy SQLi)</a></li>
-                    <li><a href="records.html">Records (Advanced SQLi)</a></li>
-                    <li><a href="reviews.html">Reviews (Stored XSS)</a></li>
-                    <li><a href="department.html">Departments (DOM XSS)</a></li>
-                    <li><a href="profile.html">Profile (CSRF)</a></li>
+                    <li><a href="index.html">Reflected XSS</a></li>
+                    <li><a href="login.html" class="active">Easy SQLi</a></li>
+                    <li><a href="records.html">Advanced SQLi</a></li>
+                    <li><a href="reviews.html">Stored XSS</a></li>
+                    <li><a href="department.html">DOM XSS</a></li>
+                    <li><a href="profile.html">CSRF Target</a></li>
                 </ul>
             </nav>
             <div class="mode-control">
                 <span id="nav-mode-badge" class="mode-indicator vulnerable">
-                    <span class="status-dot"></span> VULNERABLE MODE
+                    <span class="status-dot"></span> VULNERABLE
                 </span>
-                <button id="toggle-mode-btn" class="btn-switch">Switch Mode</button>
+                <button id="toggle-mode-btn" class="btn-switch">Toggle Mode</button>
             </div>
         </div>
     </header>
 
     <main>
-        <div class="card" style="max-width: 580px; margin: 2rem auto;">
-            <div class="card-header">
-                <div>
-                    <h1 class="card-title">
-                        <svg class="icon-svg" viewBox="0 0 24 24" style="stroke: var(--primary);">
-                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                        </svg>
-                        Clinical Authentication (SQLi Level 1: Easy)
-                    </h1>
-                    <p class="card-subtitle">
-                        Authentication bypass demonstration: String concatenation query vs parameterized prepared statement.
-                    </p>
+        <div class="card" style="max-width: 520px; margin: 2rem auto;">
+            <div class="card-header-row">
+                <div class="title-wrap">
+                    <h1 class="card-title">Portal Authentication</h1>
+                    <span class="badge badge-purple">SQLi Level 1</span>
                 </div>
+                <span class="meta-route">POST /api/login</span>
             </div>
+
+            <p class="description">
+                Demonstrates authentication bypass via SQL string concatenation versus parameterized prepared statements.
+            </p>
 
             <div id="login-alert-container"></div>
 
             <form id="login-form" onsubmit="handleLogin(event)">
                 <div class="form-group">
-                    <label for="username">Username / Identification Handle:</label>
-                    <input type="text" id="username" placeholder="Enter username or SQLi bypass payload" required>
+                    <label for="username">Username / ID Handle:</label>
+                    <input type="text" id="username" placeholder="admin or SQLi payload" required>
                 </div>
                 <div class="form-group">
                     <label for="password">Account Password:</label>
-                    <input type="password" id="password" placeholder="Enter password (optional if testing SQLi bypass)">
+                    <input type="password" id="password" placeholder="Password (optional for SQLi bypass)">
                 </div>
-                <button type="submit" class="btn btn-primary" style="width: 100%;">Authenticate User</button>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Sign In</button>
             </form>
 
             <!-- Test Payloads -->
-            <div class="payload-helper">
-                <div class="payload-header">
-                    <svg class="icon-svg" viewBox="0 0 24 24" style="stroke: var(--text-secondary); width: 14px; height: 14px;">
-                        <polyline points="4 17 10 11 4 5"></polyline>
-                        <line x1="12" y1="19" x2="20" y2="19"></line>
-                    </svg>
-                    SQL Injection Payloads (Click to Autofill):
-                </div>
-                <div class="payload-chips">
-                    <span class="chip" data-target="username" data-payload="' OR '1'='1' --">
-                        ' OR '1'='1' --
-                    </span>
-                    <span class="chip" data-target="username" data-payload="admin' --">
-                        admin' --
-                    </span>
-                    <span class="chip" data-target="username" data-payload="admin">
-                        Valid User: admin
-                    </span>
-                </div>
+            <div class="payload-strip">
+                <span class="payload-strip-label">SQLi Payloads:</span>
+                <span class="chip" data-target="username" data-payload="' OR '1'='1' --">
+                    ' OR '1'='1' --
+                </span>
+                <span class="chip" data-target="username" data-payload="admin' --">
+                    admin' --
+                </span>
+                <span class="chip" data-target="username" data-payload="admin">
+                    admin
+                </span>
             </div>
 
             <!-- Executed Query Terminal -->
-            <div id="query-inspector" style="display: none; margin-top: 1.25rem;">
-                <label class="meta-label">Executed Backend SQL Statement:</label>
+            <div id="query-inspector" style="display: none; margin-top: 1rem;">
                 <div class="terminal-box" id="query-text"></div>
             </div>
         </div>
     </main>
 
     <footer>
-        <p>MedShield Clinical Security Platform — Information Security Practical Assignment 2</p>
+        <p>MedShield Clinical Security Platform — Practical Assignment 2</p>
     </footer>
 
     <script src="app.js"></script>
@@ -132,8 +117,7 @@
                     alertContainer.innerHTML = `
                         <div class="alert alert-success">
                             <div>
-                                <strong>Authentication Successful</strong><br>
-                                Authenticated: <strong>${data.user.username}</strong> | Role: ${data.user.role} | Active Mode: ${data.mode.toUpperCase()}
+                                <strong>Authenticated:</strong> ${data.user.username} (${data.user.role}) | Mode: ${data.mode.toUpperCase()}
                             </div>
                         </div>
                     `;
@@ -141,8 +125,7 @@
                     alertContainer.innerHTML = `
                         <div class="alert alert-danger">
                             <div>
-                                <strong>Authentication Rejected:</strong> ${data.error}<br>
-                                Active Mode: ${data.mode.toUpperCase()}
+                                <strong>Rejected:</strong> ${data.error} | Mode: ${data.mode.toUpperCase()}
                             </div>
                         </div>
                     `;

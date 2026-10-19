@@ -3,111 +3,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MedShield Health Portal — Clinical Security Platform</title>
+    <title>MedShield Health Portal</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <header>
         <div class="nav-container">
             <a href="index.html" class="brand">
-                <div class="brand-icon">
-                    <svg class="icon-svg" viewBox="0 0 24 24" style="stroke: #ffffff;">
-                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                    </svg>
-                </div>
-                <span>MedShield Clinical Portal</span>
+                <span class="brand-dot"></span>
+                <span>MedShield</span>
+                <span class="brand-badge">SecLab</span>
             </a>
             <nav>
                 <ul>
-                    <li><a href="index.html" class="active">Search (Reflected XSS)</a></li>
-                    <li><a href="login.html">Login (Easy SQLi)</a></li>
-                    <li><a href="records.html">Records (Advanced SQLi)</a></li>
-                    <li><a href="reviews.html">Reviews (Stored XSS)</a></li>
-                    <li><a href="department.html">Departments (DOM XSS)</a></li>
-                    <li><a href="profile.html">Profile (CSRF)</a></li>
+                    <li><a href="index.html" class="active">Reflected XSS</a></li>
+                    <li><a href="login.html">Easy SQLi</a></li>
+                    <li><a href="records.html">Advanced SQLi</a></li>
+                    <li><a href="reviews.html">Stored XSS</a></li>
+                    <li><a href="department.html">DOM XSS</a></li>
+                    <li><a href="profile.html">CSRF Target</a></li>
                 </ul>
             </nav>
             <div class="mode-control">
                 <span id="nav-mode-badge" class="mode-indicator vulnerable">
-                    <span class="status-dot"></span> VULNERABLE MODE
+                    <span class="status-dot"></span> VULNERABLE
                 </span>
-                <button id="toggle-mode-btn" class="btn-switch">Switch Mode</button>
+                <button id="toggle-mode-btn" class="btn-switch">Toggle Mode</button>
             </div>
         </div>
     </header>
 
     <main>
-        <!-- System Status Banner -->
+        <!-- Top SaaS Metrics Toolbar -->
         <div class="card">
-            <div class="card-header">
-                <div>
-                    <h1 class="card-title">
-                        <svg class="icon-svg" viewBox="0 0 24 24" style="stroke: var(--accent);">
-                            <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
-                        </svg>
-                        Clinical Registry & Vulnerability Evaluation Dashboard
-                    </h1>
-                    <p class="card-subtitle">
-                        Dual-mode full-stack application demonstrating OWASP vulnerabilities alongside Blue Team mitigations.
-                    </p>
+            <div class="card-header-row">
+                <div class="title-wrap">
+                    <h1 class="card-title">Clinical Systems Security Console</h1>
+                    <span class="badge badge-cyan">Dual-Mode Architecture</span>
                 </div>
+                <span class="meta-route">Target: OWASP Top 10</span>
             </div>
-            <div class="alert alert-info">
-                <strong>Evaluation Mode:</strong> Use the security toggle in the top-right header to switch between Vulnerable Mode and Safe Mode. All test payloads below are live and interact directly with the backend.
+            
+            <div class="toolbar-grid">
+                <div class="metric-card">
+                    <span class="metric-label">Security State</span>
+                    <span class="metric-value" style="color: var(--accent);">Vulnerable / Safe Toggle</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-label">Database Engine</span>
+                    <span class="metric-value">SQLite3 (Clinical DB)</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-label">Active Session</span>
+                    <span class="metric-value">Patient (John Doe)</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-label">Evaluation Scope</span>
+                    <span class="metric-value">Exploits & Hardened Fixes</span>
+                </div>
             </div>
         </div>
 
         <!-- Module 1: Reflected XSS -->
         <div class="card">
-            <div class="card-header">
-                <div>
-                    <h2 class="card-title">
-                        <svg class="icon-svg" viewBox="0 0 24 24" style="stroke: var(--primary);">
-                            <circle cx="11" cy="11" r="8"></circle>
-                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                        </svg>
-                        Module 1: Specialist Directory & Search (Reflected XSS)
-                    </h2>
-                    <p class="card-subtitle">
-                        Input reflection vulnerability: In Vulnerable Mode, query strings are interpolated unescaped into HTML responses. In Safe Mode, inputs are contextually encoded.
-                    </p>
+            <div class="card-header-row">
+                <div class="title-wrap">
+                    <h2 class="card-title">Physician Directory</h2>
+                    <span class="badge badge-cyan">Reflected XSS</span>
                 </div>
+                <span class="meta-route">Endpoint: GET /api/search?q=...</span>
             </div>
 
+            <p class="description">
+                Tests unescaped query string reflection into the HTTP response (Vulnerable) versus contextual HTML entity encoding (Safe).
+            </p>
+
             <form id="search-form" onsubmit="performSearch(event)">
-                <div class="form-group">
-                    <label for="search-input">Search Physicians or Medical Specialties:</label>
-                    <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
-                        <input type="text" id="search-input" placeholder="e.g. Cardiology, Dr. Jenkins, or XSS payload..." style="flex: 1; min-width: 250px;" required>
-                        <button type="submit" class="btn btn-primary">Execute Search</button>
-                    </div>
+                <div style="display: flex; gap: 0.65rem; align-items: center;">
+                    <input type="text" id="search-input" placeholder="Search physicians or insert XSS test payload..." style="flex: 1;" required>
+                    <button type="submit" class="btn btn-primary">Search</button>
                 </div>
             </form>
 
             <!-- Test Payloads Strip -->
-            <div class="payload-helper">
-                <div class="payload-header">
-                    <svg class="icon-svg" viewBox="0 0 24 24" style="stroke: var(--text-secondary); width: 14px; height: 14px;">
-                        <polyline points="4 17 10 11 4 5"></polyline>
-                        <line x1="12" y1="19" x2="20" y2="19"></line>
-                    </svg>
-                    Reflected XSS Test Payloads (Click to Autofill):
-                </div>
-                <div class="payload-chips">
-                    <span class="chip" data-target="search-input" data-payload="<img src=x onerror=&quot;alert('Reflected XSS Triggered')&quot;>">
-                        &lt;img src=x onerror=alert(...)&gt;
-                    </span>
-                    <span class="chip" data-target="search-input" data-payload="<script>alert('Session: ' + document.cookie)</script>">
-                        &lt;script&gt;alert(document.cookie)&lt;/script&gt;
-                    </span>
-                    <span class="chip" data-target="search-input" data-payload="Cardiology">
-                        Normal Query: Cardiology
-                    </span>
-                </div>
+            <div class="payload-strip">
+                <span class="payload-strip-label">Test Payloads:</span>
+                <span class="chip" data-target="search-input" data-payload="<img src=x onerror=&quot;alert('Reflected XSS Succeeded')&quot;>">
+                    &lt;img src=x onerror=alert(...)&gt;
+                </span>
+                <span class="chip" data-target="search-input" data-payload="<script>alert('Session: ' + document.cookie)</script>">
+                    &lt;script&gt;alert(document.cookie)&lt;/script&gt;
+                </span>
+                <span class="chip" data-target="search-input" data-payload="Cardiology">
+                    Cardiology
+                </span>
             </div>
 
             <!-- Server Echo Container -->
-            <div id="search-feedback-container" style="margin-top: 1.25rem;"></div>
+            <div id="search-feedback-container" style="margin-top: 1rem;"></div>
 
             <!-- Results Table -->
             <div id="results-table-container" class="table-responsive" style="display: none;">
@@ -115,10 +108,10 @@
                     <thead>
                         <tr>
                             <th>Physician Name</th>
-                            <th>Specialty</th>
+                            <th>Medical Specialty</th>
                             <th>Clinical Department</th>
                             <th>Experience</th>
-                            <th>Evaluation Score</th>
+                            <th>Score</th>
                         </tr>
                     </thead>
                     <tbody id="results-tbody"></tbody>
@@ -128,7 +121,7 @@
     </main>
 
     <footer>
-        <p>MedShield Clinical Security Platform — Information Security Practical Assignment 2</p>
+        <p>MedShield Clinical Security Platform — Practical Assignment 2</p>
     </footer>
 
     <script src="app.js"></script>
@@ -139,7 +132,6 @@
             const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
             const data = await res.json();
 
-            // Display server echo (raw unescaped in vulnerable mode, entity-encoded in safe mode)
             const feedbackContainer = document.getElementById('search-feedback-container');
             feedbackContainer.innerHTML = data.htmlEcho;
 

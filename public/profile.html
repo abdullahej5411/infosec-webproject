@@ -3,109 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Patient Profile & Settings — MedShield Health Portal</title>
+    <title>Profile Settings — MedShield Health Portal</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <header>
         <div class="nav-container">
             <a href="index.html" class="brand">
-                <div class="brand-icon">
-                    <svg class="icon-svg" viewBox="0 0 24 24" style="stroke: #ffffff;">
-                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                    </svg>
-                </div>
-                <span>MedShield Clinical Portal</span>
+                <span class="brand-dot"></span>
+                <span>MedShield</span>
+                <span class="brand-badge">SecLab</span>
             </a>
             <nav>
                 <ul>
-                    <li><a href="index.html">Search (Reflected XSS)</a></li>
-                    <li><a href="login.html">Login (Easy SQLi)</a></li>
-                    <li><a href="records.html">Records (Advanced SQLi)</a></li>
-                    <li><a href="reviews.html">Reviews (Stored XSS)</a></li>
-                    <li><a href="department.html">Departments (DOM XSS)</a></li>
-                    <li><a href="profile.html" class="active">Profile (CSRF)</a></li>
+                    <li><a href="index.html">Reflected XSS</a></li>
+                    <li><a href="login.html">Easy SQLi</a></li>
+                    <li><a href="records.html">Advanced SQLi</a></li>
+                    <li><a href="reviews.html">Stored XSS</a></li>
+                    <li><a href="department.html">DOM XSS</a></li>
+                    <li><a href="profile.html" class="active">CSRF Target</a></li>
                 </ul>
             </nav>
             <div class="mode-control">
                 <span id="nav-mode-badge" class="mode-indicator vulnerable">
-                    <span class="status-dot"></span> VULNERABLE MODE
+                    <span class="status-dot"></span> VULNERABLE
                 </span>
-                <button id="toggle-mode-btn" class="btn-switch">Switch Mode</button>
+                <button id="toggle-mode-btn" class="btn-switch">Toggle Mode</button>
             </div>
         </div>
     </header>
 
     <main>
-        <div class="card" style="max-width: 640px; margin: 2rem auto;">
-            <div class="card-header">
-                <div>
-                    <h1 class="card-title">
-                        <svg class="icon-svg" viewBox="0 0 24 24" style="stroke: var(--primary);">
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="12" cy="7" r="4"></circle>
-                        </svg>
-                        Patient Profile & Settings (CSRF Target)
-                    </h1>
-                    <p class="card-subtitle">
-                        State-changing action: Email preference modification lacking anti-forgery validation in Vulnerable Mode.
-                    </p>
+        <div class="card" style="max-width: 580px; margin: 2rem auto;">
+            <div class="card-header-row">
+                <div class="title-wrap">
+                    <h1 class="card-title">Profile Settings</h1>
+                    <span class="badge badge-rose">CSRF Target</span>
                 </div>
+                <span class="meta-route">Endpoint: POST /api/profile/email</span>
             </div>
+
+            <p class="description">
+                Demonstrates state-changing actions executed without anti-forgery validation in Vulnerable Mode versus verified X-CSRF-Token headers in Safe Mode.
+            </p>
 
             <div id="profile-alert"></div>
 
             <!-- Profile Summary Box -->
-            <div style="background-color: var(--bg-base); border: 1px solid var(--border-default); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.5rem;">
-                <div style="margin-bottom: 0.5rem; display: flex; justify-content: space-between;">
-                    <span class="meta-label">Active User Handle:</span>
+            <div style="background-color: #0b0f19; border: 1px solid var(--border-default); border-radius: var(--radius-sm); padding: 1rem; margin-bottom: 1.25rem;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.4rem;">
+                    <span style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600;">ACTIVE HANDLE:</span>
                     <strong id="disp-username">Loading...</strong>
                 </div>
-                <div style="margin-bottom: 0.5rem; display: flex; justify-content: space-between;">
-                    <span class="meta-label">Primary Registered Email:</span>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.4rem;">
+                    <span style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600;">REGISTERED EMAIL:</span>
                     <span id="disp-email" style="color: var(--accent); font-weight: 600;">Loading...</span>
                 </div>
-                <div style="margin-bottom: 0.5rem; display: flex; justify-content: space-between;">
-                    <span class="meta-label">Clinical Assigned Role:</span>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.4rem;">
+                    <span style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600;">ASSIGNED ROLE:</span>
                     <span id="disp-role">Loading...</span>
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span class="meta-label">Session Anti-CSRF Token:</span>
-                    <code id="disp-csrf" style="color: var(--success-text); font-family: monospace; font-size: 0.85rem;">Loading...</code>
+                    <span style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600;">SESSION CSRF TOKEN:</span>
+                    <code id="disp-csrf" style="color: var(--success-text); font-family: monospace; font-size: 0.8rem;">Loading...</code>
                 </div>
             </div>
 
             <!-- Change Email Form -->
             <form id="email-form" onsubmit="updateEmail(event)">
                 <div class="form-group">
-                    <label for="new-email">Update Primary Contact Email:</label>
+                    <label for="new-email">Update Contact Email:</label>
                     <input type="email" id="new-email" placeholder="patient.newemail@hospital.org" required>
                 </div>
                 <button type="submit" class="btn btn-primary" style="width: 100%;">Save Email Preference</button>
             </form>
 
             <!-- External CSRF Attack Launcher -->
-            <div class="payload-helper" style="margin-top: 1.75rem; border-color: var(--danger-border);">
-                <div class="payload-header" style="color: var(--danger-text);">
-                    <svg class="icon-svg" viewBox="0 0 24 24" style="stroke: var(--danger); width: 14px; height: 14px;">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="12" y1="8" x2="12" y2="12"></line>
-                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                    </svg>
-                    Cross-Site Request Forgery (CSRF) Exploit Simulation
+            <div style="margin-top: 1.25rem; border-top: 1px solid var(--border-subtle); padding-top: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                    <span style="font-size: 0.8rem; color: var(--text-secondary);">Cross-Site Request Forgery PoC:</span>
+                    <a href="attacker_csrf_exploit.html" target="_blank" class="btn btn-danger">
+                        Launch Attacker Exploit Page
+                    </a>
                 </div>
-                <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 0.85rem;">
-                    In an actual attack scenario, a victim visits an external webpage hosting an auto-submitting form that leverages ambient session cookies.
-                </p>
-                <a href="attacker_csrf_exploit.html" target="_blank" class="btn btn-danger" style="width: 100%;">
-                    Launch External Attacker Exploit Page
-                </a>
             </div>
         </div>
     </main>
 
     <footer>
-        <p>MedShield Clinical Security Platform — Information Security Practical Assignment 2</p>
+        <p>MedShield Clinical Security Platform — Practical Assignment 2</p>
     </footer>
 
     <script src="app.js"></script>

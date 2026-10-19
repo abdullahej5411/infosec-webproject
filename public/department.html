@@ -10,85 +10,69 @@
     <header>
         <div class="nav-container">
             <a href="index.html" class="brand">
-                <div class="brand-icon">
-                    <svg class="icon-svg" viewBox="0 0 24 24" style="stroke: #ffffff;">
-                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                    </svg>
-                </div>
-                <span>MedShield Clinical Portal</span>
+                <span class="brand-dot"></span>
+                <span>MedShield</span>
+                <span class="brand-badge">SecLab</span>
             </a>
             <nav>
                 <ul>
-                    <li><a href="index.html">Search (Reflected XSS)</a></li>
-                    <li><a href="login.html">Login (Easy SQLi)</a></li>
-                    <li><a href="records.html">Records (Advanced SQLi)</a></li>
-                    <li><a href="reviews.html">Reviews (Stored XSS)</a></li>
-                    <li><a href="department.html" class="active">Departments (DOM XSS)</a></li>
-                    <li><a href="profile.html">Profile (CSRF)</a></li>
+                    <li><a href="index.html">Reflected XSS</a></li>
+                    <li><a href="login.html">Easy SQLi</a></li>
+                    <li><a href="records.html">Advanced SQLi</a></li>
+                    <li><a href="reviews.html">Stored XSS</a></li>
+                    <li><a href="department.html" class="active">DOM XSS</a></li>
+                    <li><a href="profile.html">CSRF Target</a></li>
                 </ul>
             </nav>
             <div class="mode-control">
                 <span id="nav-mode-badge" class="mode-indicator vulnerable">
-                    <span class="status-dot"></span> VULNERABLE MODE
+                    <span class="status-dot"></span> VULNERABLE
                 </span>
-                <button id="toggle-mode-btn" class="btn-switch">Switch Mode</button>
+                <button id="toggle-mode-btn" class="btn-switch">Toggle Mode</button>
             </div>
         </div>
     </header>
 
     <main>
         <div class="card">
-            <div class="card-header">
-                <div>
-                    <h1 class="card-title">
-                        <svg class="icon-svg" viewBox="0 0 24 24" style="stroke: var(--primary);">
-                            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
-                            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
-                        </svg>
-                        Clinical Departments Directory (DOM-based XSS)
-                    </h1>
-                    <p class="card-subtitle">
-                        Client-side script execution vulnerability: Untrusted URL fragments (location.hash) evaluated directly by browser DOM execution sinks.
-                    </p>
+            <div class="card-header-row">
+                <div class="title-wrap">
+                    <h1 class="card-title">Department Explorer</h1>
+                    <span class="badge badge-cyan">DOM-based XSS</span>
                 </div>
+                <span class="meta-route">Client-Side: window.location.hash</span>
             </div>
 
-            <div class="alert alert-info">
-                <strong>Execution Flow:</strong> Selecting a department updates <code>window.location.hash</code>. In <strong>Vulnerable Mode</strong>, client JavaScript passes this fragment directly to <code>element.innerHTML</code>. In <strong>Safe Mode</strong>, it is passed to <code>element.textContent</code>.
-            </div>
+            <p class="description">
+                Demonstrates client-side DOM execution sinks: URL fragment parsing via innerHTML (Vulnerable) versus safe textContent (Safe).
+            </p>
 
-            <div style="display: flex; gap: 0.65rem; flex-wrap: wrap; margin-bottom: 1.25rem;">
-                <button class="btn btn-secondary" onclick="setDepartmentHash('Cardiovascular Care')">Cardiology Department</button>
-                <button class="btn btn-secondary" onclick="setDepartmentHash('Brain & Spine Institute')">Neurology Department</button>
-                <button class="btn btn-secondary" onclick="setDepartmentHash('Cancer Care Center')">Oncology Department</button>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                <button class="btn btn-secondary" onclick="setDepartmentHash('Cardiovascular Care')">Cardiology</button>
+                <button class="btn btn-secondary" onclick="setDepartmentHash('Brain & Spine Institute')">Neurology</button>
+                <button class="btn btn-secondary" onclick="setDepartmentHash('Cancer Care Center')">Oncology</button>
             </div>
 
             <!-- DOM Quick Chips -->
-            <div class="payload-helper">
-                <div class="payload-header">
-                    <svg class="icon-svg" viewBox="0 0 24 24" style="stroke: var(--text-secondary); width: 14px; height: 14px;">
-                        <polyline points="4 17 10 11 4 5"></polyline>
-                        <line x1="12" y1="19" x2="20" y2="19"></line>
-                    </svg>
-                    DOM XSS Payloads (Click to Trigger):
-                </div>
-                <div class="payload-chips">
-                    <span class="chip" onclick="setDepartmentHash('<img src=x onerror=&quot;alert(\'DOM XSS via location.hash\')&quot;>')">
-                        Trigger: &lt;img src=x onerror=alert(...)&gt;
-                    </span>
-                    <span class="chip" onclick="setDepartmentHash('<svg onload=&quot;alert(\'SVG DOM XSS Executed\')&quot;>')">
-                        Trigger: &lt;svg onload=alert(...)&gt;
-                    </span>
-                    <span class="chip" onclick="setDepartmentHash('Diagnostic Imaging')">
-                        Normal Selection: Diagnostic Imaging
-                    </span>
-                </div>
+            <div class="payload-strip">
+                <span class="payload-strip-label">DOM Payloads:</span>
+                <span class="chip" onclick="setDepartmentHash('<img src=x onerror=&quot;alert(\'DOM XSS via location.hash\')&quot;>')">
+                    &lt;img src=x onerror=alert(...)&gt;
+                </span>
+                <span class="chip" onclick="setDepartmentHash('<svg onload=&quot;alert(\'SVG DOM XSS Executed\')&quot;>')">
+                    &lt;svg onload=alert(...)&gt;
+                </span>
+                <span class="chip" onclick="setDepartmentHash('Diagnostic Imaging')">
+                    Diagnostic Imaging
+                </span>
             </div>
 
             <!-- Dynamic Target -->
-            <div style="margin-top: 1.5rem; background-color: var(--bg-base); border: 1px solid var(--border-default); border-radius: var(--radius-md); padding: 1.25rem;">
-                <label class="meta-label">Active Department Display (DOM Sink Output):</label>
-                <div id="dept-preview" style="font-size: 1rem; color: var(--text-primary); margin-top: 0.5rem; min-height: 32px;">
+            <div style="margin-top: 1.25rem; background-color: #0b0f19; border: 1px solid var(--border-default); border-radius: var(--radius-sm); padding: 1rem;">
+                <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600; margin-bottom: 0.35rem;">
+                    DOM Sink Output (dept-preview):
+                </div>
+                <div id="dept-preview" style="font-size: 0.95rem; color: var(--text-primary); min-height: 24px;">
                     Select a department or payload above.
                 </div>
             </div>
@@ -96,7 +80,7 @@
     </main>
 
     <footer>
-        <p>MedShield Clinical Security Platform — Information Security Practical Assignment 2</p>
+        <p>MedShield Clinical Security Platform — Practical Assignment 2</p>
     </footer>
 
     <script src="app.js"></script>
@@ -117,11 +101,9 @@
             const data = await res.json();
 
             if (data.isSafeMode) {
-                // Safe defense: textContent avoids DOM execution sinks
-                previewEl.textContent = `Active Department: ${rawVal} (Sanitized via textContent)`;
+                previewEl.textContent = `Selected: ${rawVal} (Sanitized via textContent)`;
             } else {
-                // Vulnerable: innerHTML execution sink
-                previewEl.innerHTML = `Active Department: ${rawVal} <span style="color: var(--danger-text); font-size: 0.85rem;">[Rendered via innerHTML sink]</span>`;
+                previewEl.innerHTML = `Selected: ${rawVal} <span style="color: var(--danger-text); font-size: 0.8rem;">[Rendered via innerHTML sink]</span>`;
             }
         }
 

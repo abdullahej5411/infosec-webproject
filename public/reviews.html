@@ -3,62 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Patient Testimonials — MedShield Health Portal</title>
+    <title>Patient Reviews — MedShield Health Portal</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <header>
         <div class="nav-container">
             <a href="index.html" class="brand">
-                <div class="brand-icon">
-                    <svg class="icon-svg" viewBox="0 0 24 24" style="stroke: #ffffff;">
-                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                    </svg>
-                </div>
-                <span>MedShield Clinical Portal</span>
+                <span class="brand-dot"></span>
+                <span>MedShield</span>
+                <span class="brand-badge">SecLab</span>
             </a>
             <nav>
                 <ul>
-                    <li><a href="index.html">Search (Reflected XSS)</a></li>
-                    <li><a href="login.html">Login (Easy SQLi)</a></li>
-                    <li><a href="records.html">Records (Advanced SQLi)</a></li>
-                    <li><a href="reviews.html" class="active">Reviews (Stored XSS)</a></li>
-                    <li><a href="department.html">Departments (DOM XSS)</a></li>
-                    <li><a href="profile.html">Profile (CSRF)</a></li>
+                    <li><a href="index.html">Reflected XSS</a></li>
+                    <li><a href="login.html">Easy SQLi</a></li>
+                    <li><a href="records.html">Advanced SQLi</a></li>
+                    <li><a href="reviews.html" class="active">Stored XSS</a></li>
+                    <li><a href="department.html">DOM XSS</a></li>
+                    <li><a href="profile.html">CSRF Target</a></li>
                 </ul>
             </nav>
             <div class="mode-control">
                 <span id="nav-mode-badge" class="mode-indicator vulnerable">
-                    <span class="status-dot"></span> VULNERABLE MODE
+                    <span class="status-dot"></span> VULNERABLE
                 </span>
-                <button id="toggle-mode-btn" class="btn-switch">Switch Mode</button>
+                <button id="toggle-mode-btn" class="btn-switch">Toggle Mode</button>
             </div>
         </div>
     </header>
 
     <main>
         <div class="card">
-            <div class="card-header">
-                <div>
-                    <h1 class="card-title">
-                        <svg class="icon-svg" viewBox="0 0 24 24" style="stroke: var(--primary);">
-                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                        </svg>
-                        Patient Feedback Registry (Stored XSS)
-                    </h1>
-                    <p class="card-subtitle">
-                        Persistent cross-site scripting demonstration: Unsanitized inputs written directly to the database execute whenever retrieved.
-                    </p>
+            <div class="card-header-row">
+                <div class="title-wrap">
+                    <h1 class="card-title">Patient Testimonials</h1>
+                    <span class="badge badge-amber">Stored XSS</span>
                 </div>
+                <span class="meta-route">Endpoint: POST /api/reviews</span>
             </div>
 
+            <p class="description">
+                Demonstrates persistent script injection: Comment payload stored directly into database executes whenever retrieved by any user.
+            </p>
+
             <form id="review-form" onsubmit="submitReview(event)">
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem;">
-                    <div class="form-group">
-                        <label for="patient_name">Patient Identifier:</label>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; margin-bottom: 0.85rem;">
+                    <div>
+                        <label for="patient_name">Patient Handle:</label>
                         <input type="text" id="patient_name" value="Patient Alex" required>
                     </div>
-                    <div class="form-group">
+                    <div>
                         <label for="doctor_name">Attending Physician:</label>
                         <select id="doctor_name">
                             <option value="Dr. Sarah Jenkins">Dr. Sarah Jenkins (Cardiology)</option>
@@ -69,44 +64,40 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="comment">Clinical Experience Description:</label>
-                    <textarea id="comment" rows="3" placeholder="Enter clinical review or Stored XSS payload..." required></textarea>
+                    <label for="comment">Feedback Content:</label>
+                    <textarea id="comment" rows="2" placeholder="Enter clinical testimonial or Stored XSS payload..." required></textarea>
                 </div>
 
-                <button type="submit" class="btn btn-primary">Submit Clinical Feedback</button>
+                <button type="submit" class="btn btn-primary">Submit Testimonial</button>
             </form>
 
-            <!-- Test Payloads -->
-            <div class="payload-helper">
-                <div class="payload-header">
-                    <svg class="icon-svg" viewBox="0 0 24 24" style="stroke: var(--text-secondary); width: 14px; height: 14px;">
-                        <polyline points="4 17 10 11 4 5"></polyline>
-                        <line x1="12" y1="19" x2="20" y2="19"></line>
-                    </svg>
-                    Stored XSS Test Payloads (Click to Autofill):
-                </div>
-                <div class="payload-chips">
-                    <span class="chip" data-target="comment" data-payload="<img src=x onerror=&quot;alert('Stored XSS Executed from Database')&quot;>">
-                        &lt;img src=x onerror=alert(...)&gt;
-                    </span>
-                    <span class="chip" data-target="comment" data-payload="<b onmouseover=&quot;alert('Hover XSS Triggered')&quot; style=&quot;color:#f87171;cursor:pointer;&quot;>Move pointer here to trigger hover event</b>">
-                        Mouseover Event Handler
-                    </span>
-                    <span class="chip" data-target="comment" data-payload="Treatment in the cardiovascular department was prompt and professional.">
-                        Normal Review Text
-                    </span>
-                </div>
+            <!-- Test Payloads Strip -->
+            <div class="payload-strip">
+                <span class="payload-strip-label">Stored XSS Payloads:</span>
+                <span class="chip" data-target="comment" data-payload="<img src=x onerror=&quot;alert('Stored XSS Executed')&quot;>">
+                    &lt;img src=x onerror=alert(...)&gt;
+                </span>
+                <span class="chip" data-target="comment" data-payload="<b onmouseover=&quot;alert('Hover XSS')&quot; style=&quot;color:#f87171;cursor:pointer;&quot;>Hover pointer here to trigger event</b>">
+                    Mouseover Event
+                </span>
+                <span class="chip" data-target="comment" data-payload="Treatment in the cardiovascular unit was prompt and effective.">
+                    Normal Comment
+                </span>
             </div>
 
-            <div style="margin-top: 1.75rem;">
-                <label class="meta-label">Persisted Patient Testimonials:</label>
-                <div id="reviews-container" style="margin-top: 0.75rem;"></div>
+            <!-- Existing Reviews List -->
+            <div style="margin-top: 1.5rem;">
+                <div class="card-header-row" style="margin-bottom: 0.85rem; padding-bottom: 0.5rem;">
+                    <span class="card-title" style="font-size: 0.95rem;">Recorded Patient Feedback</span>
+                    <span class="meta-route">Live SQLite Output</span>
+                </div>
+                <div id="reviews-container"></div>
             </div>
         </div>
     </main>
 
     <footer>
-        <p>MedShield Clinical Security Platform — Information Security Practical Assignment 2</p>
+        <p>MedShield Clinical Security Platform — Practical Assignment 2</p>
     </footer>
 
     <script src="app.js"></script>
@@ -126,14 +117,14 @@
                             <strong>${r.patient_name}</strong>
                             <span>Physician: ${r.doctor_name} | <span class="score-badge">Score: ${r.rating}.0 / 5.0</span></span>
                         </div>
-                        <div style="color: var(--text-primary); font-size: 0.9rem;">
+                        <div style="color: var(--text-primary); font-size: 0.85rem;">
                             ${r.comment}
                         </div>
                     `;
                     container.appendChild(card);
                 });
             } else {
-                container.innerHTML = `<p style="color: var(--text-muted); padding: 1rem 0;">No reviews recorded yet.</p>`;
+                container.innerHTML = `<p style="color: var(--text-muted); padding: 0.5rem 0;">No reviews recorded.</p>`;
             }
         }
 

@@ -42,12 +42,12 @@ async function updateModeBadge() {
         if (badge) {
             if (data.isSafeMode) {
                 badge.className = 'mode-indicator safe';
-                badge.innerHTML = '<span class="status-dot"></span> SAFE (HARDENED) MODE';
-                if (toggleBtn) toggleBtn.textContent = 'Switch to Vulnerable';
+                badge.innerHTML = '<span class="status-dot"></span> SAFE';
+                if (toggleBtn) toggleBtn.textContent = 'Toggle Mode';
             } else {
                 badge.className = 'mode-indicator vulnerable';
-                badge.innerHTML = '<span class="status-dot"></span> VULNERABLE MODE';
-                if (toggleBtn) toggleBtn.textContent = 'Switch to Safe Mode';
+                badge.innerHTML = '<span class="status-dot"></span> VULNERABLE';
+                if (toggleBtn) toggleBtn.textContent = 'Toggle Mode';
             }
         }
     } catch (e) {
